@@ -1,0 +1,9 @@
+INSTALL THE SITE AS AN APP
+
+1. Upload the contents of this folder to the root of a GitHub Pages repository (keep index.html, manifest.webmanifest, service-worker.js, and icons/ together).
+2. Enable GitHub Pages and open the published HTTPS address.
+3. Android / Chrome: the install card appears; tap Install App and confirm. If the browser does not show a native prompt, use Chrome menu > Install app / Add to Home screen.
+4. iPhone / iPad: open the HTTPS site in Safari, tap Share, choose Add to Home Screen, then tap Add. iOS does not allow websites to force the native install prompt.
+5. Windows / macOS: open the HTTPS site in Chrome or Edge and use Install app from the address bar or browser menu.
+
+The install card is a website prompt; the browser controls the actual installation confirmation. The service worker deliberately does not cache customer or transaction data.

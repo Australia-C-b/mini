@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#09160f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Capital Bank Admin">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Capital Bank of Australia – Administration</title>
+<style>
+:root{
+  --ink-950:#050d09;
+  --ink-900:#09160f;
+  --ink-800:#0e2218;
+  --ink-700:#16301f;
+  --brass-500:#b8975a;
+  --brass-400:#cfae6f;
+  --brass-300:#e4cb98;
+  --ivory:#f3ecd8;
+  --mist:#a3b3a8;
+  --hair:rgba(207,174,111,.22);
+  --hair-soft:rgba(207,174,111,.12);
+  --ok:#8fc9a3;
+  --warn:#e8b86a;
+  --err:#f0a597;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:"Avenir Next","Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:var(--sans);color:var(--ivory);display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(900px 520px at 12% 8%,rgba(184,151,90,.14),transparent 60%),var(--ink-950);
+}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--brass-400);outline-offset:2px;border-radius:6px}
+
+.phone{
+  width:100%;max-width:1100px;height:100dvh;min-height:100svh;max-height:none;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;background:var(--ink-900);margin:0 auto;
+}
+@media(min-width:700px){
+  body{padding:18px}
+  .phone{height:calc(100dvh - 36px);min-height:600px;border:1px solid var(--hair);border-radius:22px;box-shadow:0 24px 80px rgba(0,0,0,.45)}
+}
+@media(max-width:699px){
+  body{display:block;padding:0}
+  .phone{width:100%;height:100dvh;min-height:100svh;border-radius:0}
+}
+
+/* ---------- shared ---------- */
+.wordmark{font-family:var(--serif);font-weight:600;letter-spacing:.3px;color:var(--brass-300)}
+.hairline{height:1px;background:var(--hair);border:0}
+.scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+
+/* ---------- sign in ---------- */
+.login{flex:1;display:flex;flex-direction:column;justify-content:center;padding:32px 30px}
+.crest{
+  width:64px;height:64px;margin:0 auto 22px;border-radius:50%;display:grid;place-items:center;
+  border:1px solid var(--brass-500);color:var(--brass-300);font-family:var(--serif);font-size:26px;
+  box-shadow:inset 0 0 0 5px var(--ink-900),inset 0 0 0 6px var(--hair);
+}
+.login h1{font-family:var(--serif);font-size:26px;font-weight:600;text-align:center;color:var(--brass-300);line-height:1.2}
+.login .sub{text-align:center;color:var(--mist);font-size:14px;margin:8px 0 32px}
+.login .note{font-size:12.5px;color:var(--mist);line-height:1.5;margin-top:16px;text-align:center}
+
+.field{margin-bottom:16px}
+.field label{display:block;font-size:13px;color:var(--brass-300);margin-bottom:6px}
+.input{
+  width:100%;height:50px;padding:0 14px;border-radius:12px;font-size:16px;
+  background:rgba(5,13,9,.6);border:1px solid var(--hair);
+}
+textarea.input{height:92px;padding:12px 14px;resize:none;line-height:1.4}
+select.input{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--brass-400) 50%),linear-gradient(135deg,var(--brass-400) 50%,transparent 50%);background-position:calc(100% - 20px) 22px,calc(100% - 15px) 22px;background-size:5px 5px;background-repeat:no-repeat}
+.input:focus{border-color:var(--brass-400);box-shadow:0 0 0 3px rgba(207,174,111,.16)}
+.input[aria-invalid="true"]{border-color:var(--err)}
+.hint{font-size:12px;color:var(--mist);margin-top:5px}
+.err{font-size:12.5px;color:var(--err);margin-top:6px;min-height:0}
+
+.btn{
+  width:100%;height:52px;border-radius:14px;font-weight:600;font-size:15.5px;letter-spacing:.2px;
+  display:flex;align-items:center;justify-content:center;transition:transform .15s,opacity .2s,background .2s;
+}
+.btn:active{transform:scale(.985)}
+.btn.primary{background:linear-gradient(180deg,var(--brass-300),var(--brass-500));color:var(--ink-950);box-shadow:0 8px 22px rgba(184,151,90,.28)}
+.btn.quiet{border:1px solid var(--hair);color:var(--ivory)}
+.btn.danger{border:1px solid rgba(240,165,151,.5);color:var(--err)}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.btn + .btn{margin-top:10px}
+
+/* ---------- home ---------- */
+.top{
+  flex:none;display:flex;align-items:center;gap:12px;
+  padding:max(16px,env(safe-area-inset-top)) 20px 14px;
+}
+.top .titles{flex:1}
+.top .wordmark{font-size:19px;line-height:1.15}
+.top .role{font-size:12.5px;color:var(--mist);margin-top:2px}
+.icon-btn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--hair);color:var(--brass-300)}
+.icon-btn svg{width:18px;height:18px}
+
+.ledger{padding:6px 20px 22px}
+.ledger .label{font-size:13px;color:var(--mist)}
+.ledger .figure{font-family:var(--serif);font-size:42px;font-weight:500;letter-spacing:-.5px;line-height:1.1;margin:4px 0 18px;color:var(--ivory)}
+.ledger .figure span{color:var(--brass-400)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)}
+.stat{padding:12px 0 12px 14px;border-left:1px solid var(--hair)}
+.stat:first-child{border-left:0;padding-left:0}
+.stat b{display:block;font-family:var(--serif);font-size:22px;font-weight:500}
+.stat small{font-size:12px;color:var(--mist)}
+
+.section-title{font-family:var(--serif);font-size:17px;font-weight:600;color:var(--brass-300);padding:0 20px 6px}
+.rows{margin:0 20px 26px;border-top:1px solid var(--hair)}
+.row{
+  width:100%;display:flex;align-items:center;gap:14px;padding:14px 2px;text-align:left;
+  border-bottom:1px solid var(--hair);
+}
+.row .mark{
+  flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;
+  border:1px solid var(--brass-500);color:var(--brass-300);
+}
+.row .mark svg{width:17px;height:17px}
+.row .txt{flex:1;min-width:0}
+.row .t{font-family:var(--serif);font-size:16.5px}
+.row .s{font-size:12.5px;color:var(--mist);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .chev{width:16px;height:16px;color:var(--brass-500);flex:none}
+.badge{font-size:12px;padding:3px 9px;border-radius:999px;background:var(--brass-400);color:var(--ink-950);font-weight:700}
+.tag{font-size:11.5px;padding:2px 8px;border-radius:999px;border:1px solid}
+.tag.ok{color:var(--ok);border-color:rgba(143,201,163,.4)}
+.tag.warn{color:var(--warn);border-color:rgba(232,184,106,.45)}
+.tag.err{color:var(--err);border-color:rgba(240,165,151,.45)}
+.bal{font-family:var(--serif);font-size:15.5px;text-align:right}
+.row .chev{transition:transform .2s}
+.row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+.drop{border-bottom:1px solid var(--hair);padding:4px 0 8px 52px}
+.drop button{display:block;width:100%;text-align:left;padding:11px 2px;font-family:var(--serif);font-size:15.5px;border-bottom:1px solid var(--hair-soft)}
+.drop button:last-child{border-bottom:0}
+.drop small{display:block;font-family:var(--sans);font-size:11.5px;color:var(--mist)}
+.page{position:absolute;inset:0;z-index:45;display:flex;flex-direction:column;background:var(--ink-900);animation:in .25s ease-out}
+@keyframes in{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+.page-top{flex:none;display:flex;align-items:center;gap:12px;padding:max(16px,env(safe-area-inset-top)) 20px 14px;border-bottom:1px solid var(--hair)}
+.page-top h2{flex:1;font-family:var(--serif);font-size:21px;font-weight:600;color:var(--brass-300)}
+.page-body{flex:1;min-height:0;overflow-y:auto;padding:18px 20px 28px;scrollbar-width:none}
+.page-body::-webkit-scrollbar{display:none}
+.spin{width:18px;height:18px;border-radius:50%;border:2px solid rgba(5,13,9,.3);border-top-color:var(--ink-950);animation:rot .8s linear infinite;margin-right:10px}
+@keyframes rot{to{transform:rotate(360deg)}}
+.success{border-color:rgba(143,201,163,.5);background:rgba(143,201,163,.08)}
+.success .ttl{font-family:var(--serif);font-size:18px;color:var(--ok);margin-bottom:6px}
+.empty{padding:18px 2px;color:var(--mist);font-size:14px}
+
+/* ---------- sheet ---------- */
+.scrim{position:absolute;inset:0;z-index:40;background:rgba(2,8,5,.7);opacity:0;pointer-events:none;transition:opacity .25s}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{
+  position:absolute;left:0;right:0;bottom:0;z-index:50;max-height:92%;display:flex;flex-direction:column;
+  background:var(--ink-800);border-top:1px solid var(--brass-500);border-radius:26px 26px 0 0;
+  transform:translateY(102%);transition:transform .32s cubic-bezier(.2,.8,.2,1);
+}
+.sheet.on{transform:none}
+.sheet-head{flex:none;display:flex;align-items:center;padding:20px 20px 12px}
+.sheet-head h2{flex:1;font-family:var(--serif);font-size:21px;font-weight:600;color:var(--brass-300)}
+.sheet-body{flex:1;min-height:0;overflow-y:auto;padding:4px 20px max(24px,env(safe-area-inset-bottom));scrollbar-width:none}
+.sheet-body::-webkit-scrollbar{display:none}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.kv{display:flex;justify-content:space-between;gap:16px;padding:11px 0;border-bottom:1px solid var(--hair-soft);font-size:14px}
+.kv span:first-child{color:var(--mist)}
+.kv span:last-child{text-align:right}
+.review{margin:4px 0 18px;padding:14px;border-radius:12px;background:rgba(5,13,9,.5);border:1px solid var(--hair);font-size:14px;line-height:1.5}
+.review b{font-family:var(--serif);font-size:18px;font-weight:600}
+.queue-item{padding:14px 0;border-bottom:1px solid var(--hair)}
+.queue-item .top-line{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.queue-item .who{font-family:var(--serif);font-size:16.5px}
+.queue-item .amt{font-family:var(--serif);font-size:17px}
+.queue-item .ref{font-size:12.5px;color:var(--mist);margin:3px 0 10px}
+.queue-item .acts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.queue-item .btn{height:42px;font-size:14px;margin:0}
+
+.toast{
+  position:absolute;left:50%;bottom:24px;z-index:80;transform:translate(-50%,16px);opacity:0;pointer-events:none;
+  background:var(--brass-300);color:var(--ink-950);font-weight:600;font-size:13.5px;padding:11px 18px;border-radius:999px;
+  box-shadow:0 10px 30px rgba(0,0,0,.45);transition:.25s;max-width:90%;text-align:center;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast.bad{background:var(--err)}
+
+[hidden]{display:none !important}
+@media(prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+
+/* ---------- app installation prompt ---------- */
+.install-overlay{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:22px;background:rgba(0,0,0,.72);backdrop-filter:blur(8px)}
+.install-overlay.show{display:flex}
+.install-card{width:min(100%,390px);padding:26px 22px;border:1px solid var(--brass-500);border-radius:20px;background:var(--ink-900);box-shadow:0 24px 80px rgba(0,0,0,.55);text-align:center}
+.install-card .app-icon{width:66px;height:66px;object-fit:contain;margin:0 auto 14px;display:block;border-radius:16px}
+.install-card h2{font-family:var(--serif);color:var(--brass-300);font-size:23px;margin-bottom:8px}
+.install-card p{color:var(--mist);font-size:13px;line-height:1.55;margin-bottom:18px}
+.install-actions{display:grid;gap:10px}
+.install-actions button{min-height:48px;border-radius:12px;font-weight:650}
+.install-actions .install-primary{background:linear-gradient(180deg,var(--brass-300),var(--brass-500));color:var(--ink-950)}
+.install-actions .install-later{border:1px solid var(--hair);color:var(--ivory)}
+.install-help{font-size:12px!important;margin:14px 0 0!important}
+@media(prefers-reduced-motion:no-preference){.install-card{animation:installIn .22s ease-out}@keyframes installIn{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}}
+</style>
+</head>
+<body>
+<div class="install-overlay" id="installOverlay" role="dialog" aria-modal="true" aria-labelledby="installTitle">
+  <div class="install-card">
+    <img class="app-icon" src="icons/icon-192.png" alt="App icon">
+    <h2 id="installTitle">Install Capital Bank Admin</h2>
+    <p>Install this site on your device for quick access from your home screen or desktop.</p>
+    <div class="install-actions">
+      <button class="install-primary" id="installNow">Install App</button>
+      <button class="install-later" id="installLater">Maybe later</button>
+    </div>
+    <p class="install-help" id="installHelp">You can install the app now or continue using it in your browser.</p>
+  </div>
+</div>
+<div class="phone" id="app">
+
+  <noscript><div style="padding:20px;text-align:center;color:#fff;background:#8b0000">JavaScript is blocked on this page, so Sign in cannot work. Open the GitHub Pages link (username.github.io/repo/admin.html) in Chrome/Safari — not the github.com repo page.</div></noscript>
+  <!-- SIGN IN -->
+  <main class="login" id="loginView">
+    <div class="crest" aria-hidden="true">C</div>
+    <h1>Capital Bank of Australia</h1>
+    <p class="sub">Administration console</p>
+    <form id="loginForm" novalidate>
+      <div class="field">
+        <label for="lgPass">Password</label>
+        <input id="lgPass" class="input" type="password" inputmode="numeric" autocomplete="off" placeholder="Password" autofocus>
+        <div class="err" id="lgErr" role="alert"></div>
+      </div>
+      <button class="btn primary" type="submit">Sign in</button>
+      <p style="text-align:center;margin-top:14px"><a href="#" id="forgotPass" style="color:var(--gold);font-size:14px">Forgot password? Reset to default</a></p>
+      <p style="text-align:center;margin-top:10px;color:var(--mist);font-size:12px">Admin build 2026-11-17 · v3</p>
+    </form>
+  </main>
+
+  <!-- HOME -->
+  <div id="homeView" hidden style="display:flex;flex-direction:column;flex:1;min-height:0">
+    <header class="top">
+      <div class="titles">
+        <div class="wordmark">Capital Bank of Australia</div>
+        <div class="role">Administration</div>
+      </div>
+      <button class="icon-btn" data-act="refresh" aria-label="Refresh customers" title="Refresh customers">↻</button>
+      <button class="icon-btn" data-act="logout" aria-label="Sign out">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      </button>
+    </header>
+
+    <div class="scroll" id="homeScroll">
+      <section class="ledger" aria-label="Summary">
+        <div class="label">Funds under administration</div>
+        <div class="figure" id="figTotal"></div>
+        <div class="stats">
+          <div class="stat"><b id="stCust">0</b><small>Customers</small></div>
+          <div class="stat"><b id="stPend">0</b><small>Awaiting approval</small></div>
+          <div class="stat"><b id="stRestr">0</b><small>Restricted</small></div>
+        </div>
+      </section>
+
+      <h2 class="section-title">Actions</h2>
+      <div class="rows" id="actionRows"></div>
+
+      <h2 class="section-title">Customers</h2>
+      <div class="rows" id="custRows"></div>
+
+      <h2 class="section-title">Recent activity</h2>
+      <div class="rows" id="logRows"></div>
+
+      <div style="padding:0 20px 32px"><button class="btn quiet" data-act="logout">Logout</button></div>
+    </div>
+  </div>
+
+  <div class="scrim" id="scrim"></div>
+  <section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" aria-hidden="true">
+    <div class="sheet-head">
+      <h2 id="sheetTitle"></h2>
+      <button class="icon-btn" data-act="closeSheet" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="sheet-body" id="sheetBody"></div>
+  </section>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+
+<script>
+/* ============ Helpers ============ */
+const $ = id => document.getElementById(id);
+const aud = new Intl.NumberFormat('en-AU', { style:'currency', currency:'AUD' });
+const dt = new Intl.DateTimeFormat('en-AU', { day:'numeric', month:'short', hour:'numeric', minute:'2-digit' });
+const dday = new Intl.DateTimeFormat('en-AU', { day:'numeric', month:'short', year:'numeric' });
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const DAY = 86400000;
+
+const ICON = {
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  up:'<path d="M12 19V5M6 11l6-6 6 6"/>',
+  down:'<path d="M12 5v14M6 13l6 6 6-6"/>',
+  lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  queue:'<path d="M4 7h16M4 12h16M4 17h10"/>',
+  mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+  cog:'<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',
+};
+const svg = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${ICON[k]}</svg>`;
+const chev = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
+
+/* ============ Data (JsonBin is the single source of truth) ============ */
+const rnd = n => Array.from({length:n}, () => Math.floor(Math.random()*10)).join('');
+const now = Date.now();
+const state = { outbox: [], customers: [], queue: [], log: [], user: null, banks: [], processedQueue: [] };
+
+/* ---------- JsonBin cloud (shared by Admin + Dashboard) ---------- */
+const JB={bin:'6afabd12ac6210605a8b38f8',key:'$2a$10$U4fhHhVXIJJ0hVeb618mI.s44UL.Eeh5r71afaUmpKIA6.Sq3/GHW',url:'https://api.jsonbin.io/v3/b/6afabd12ac6210605a8b38f8'};
+const DB_KEY='cba_admin_db_v1';
+const local={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}},del:k=>{try{localStorage.removeItem(k)}catch(e){}}};
+function cyrb53(str,seed=0){let h1=0xdeadbeef^seed,h2=0x41c6ce57^seed;for(let i=0,ch;i<str.length;i++){ch=str.charCodeAt(i);h1=Math.imul(h1^ch,2654435761);h2=Math.imul(h2^ch,1597334677)}
+  h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);
+  return(4294967296*(2097151&h2)+(h1>>>0)).toString(16)}
+let cloudCache=null,cloudBase=null,cloudLoaded=false,cloudTimer=null,cloudSaving=null,cloudDirty=0,cloudSaved=0,cloudWriteChain=Promise.resolve(),cloudBusy=false;
+const BASE_KEY='cba_admin_base_v1',PEND_KEY='cba_admin_pend_v1';
+async function jbGet(){const r=await fetch(JB.url+`/latest`,{headers:{'X-Master-Key':JB.key},cache:'no-store'});if(!r.ok)throw new Error('JsonBin read failed');const j=await r.json();return j.record;}
+async function jbPut(db){const r=await fetch(JB.url,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':JB.key,'X-Bin-Versioning':'false'},body:JSON.stringify(db)});if(!r.ok)throw new Error('JsonBin write failed');return r.json();}
+/* ---- Three-way merge. `base` = fingerprints of what this page last saw in the bin. A save only writes what THIS page
+        changed and keeps whatever the other side (Admin / Dashboard) wrote in the meantime, so nobody overwrites anybody. ---- */
+const sig=x=>cyrb53(JSON.stringify(x===undefined?null:x));
+const isObj=x=>!!x&&typeof x==='object'&&!Array.isArray(x);
+const itemKey=x=>(isObj(x)&&x.id!=null)?'i:'+x.id:'h:'+sig(x);
+function arrBase(a){const m={};a.forEach(x=>{m[itemKey(x)]=sig(x)});return m}
+const fBase=v=>Array.isArray(v)?{a:arrBase(v)}:{s:sig(v)};
+function objBase(o){const f={};Object.keys(o).forEach(k=>{f[k]=fBase(o[k])});return f}
+function dbBase(db){
+  const b={cu:{},a:{},m:{},s:{}};
+  db.customers.forEach(c=>{b.cu[c.id]=objBase(c)});
+  Object.keys(db).forEach(k=>{if(k==='customers')return;const v=db[k];if(Array.isArray(v))b.a[k]=arrBase(v);else if(isObj(v))b.m[k]=objBase(v);else b.s[k]=sig(v)});
+  return b;
+}
+function setBase(db){cloudBase=dbBase(db);try{local.set(BASE_KEY,JSON.stringify(cloudBase))}catch(_e){}}
+const stamp=x=>isObj(x)?(x.ts!=null?x.ts:x.t!=null?x.t:x.created!=null?x.created:null):null;
+function mergeArr(mine,remote,bm){
+  bm=bm||{};const rm=new Map(remote.map(x=>[itemKey(x),x])),mk=new Set(),res=[];
+  mine.forEach(x=>{const k=itemKey(x);mk.add(k);const was=bm[k];
+    if(was===undefined||sig(x)!==was)res.push(x);        /* new or edited here → ours */
+    else if(rm.has(k))res.push(rm.get(k));                 /* untouched here → the bin's version */
+    /* else: removed by the other side → stays removed */});
+  const add=remote.filter(x=>{const k=itemKey(x);return !mk.has(k)&&bm[k]===undefined});   /* added by the other side */
+  const ref=mine.length>1?mine:remote,f=stamp(ref[0]),l=stamp(ref[ref.length-1]);
+  return(typeof f==='number'&&typeof l==='number'&&f>l)?add.concat(res):res.concat(add);   /* keep newest-first lists newest-first */
+}
+function mergeVal(mine,remote,bf){
+  if(!bf)return mine;
+  if(Array.isArray(mine)&&Array.isArray(remote)&&bf.a)return mergeArr(mine,remote,bf.a);
+  return(bf.s===undefined||sig(mine)!==bf.s)?mine:remote;
+}
+function mergeObj(mine,remote,bf){
+  const out=Object.assign({},remote);
+  Object.keys(mine).forEach(f=>{
+    if(f in remote)out[f]=mergeVal(mine[f],remote[f],bf[f]);
+    else if(!bf[f])out[f]=mine[f];                       /* new field here (a field removed by the other side stays removed) */
+  });
+  Object.keys(bf).forEach(f=>{if(!(f in mine))delete out[f]});   /* removed here */
+  return out;
+}
+function mergeDB(mine,remote,base){
+  if(!base||!base.cu||!remote||!Array.isArray(remote.customers))return mine;
+  const out=Object.assign({},remote),rm=new Map(remote.customers.map(c=>[c.id,c])),mk=new Set(),cs=[];
+  mine.customers.forEach(c=>{mk.add(c.id);const bf=base.cu[c.id];
+    if(!bf)cs.push(c);else if(rm.has(c.id)){const m=mergeObj(c,rm.get(c.id),bf);cs.push(sig(m)===sig(c)?c:m);}});   /* keep the same object when nothing came in from the other side */
+  remote.customers.forEach(c=>{if(!mk.has(c.id)&&!base.cu[c.id])cs.push(c)});
+  out.customers=cs;
+  Object.keys(mine).forEach(k=>{
+    if(k==='customers')return;const v=mine[k],rv=remote[k];
+    if(Array.isArray(v)&&Array.isArray(rv)&&base.a[k])out[k]=mergeArr(v,rv,base.a[k]);
+    else if(isObj(v)&&isObj(rv)&&base.m[k])out[k]=mergeObj(v,rv,base.m[k]);
+    else if(k==='seq')out[k]=Math.max(v||0,rv||0);
+    else if(base.s[k]===undefined||sig(v)!==base.s[k]||rv===undefined)out[k]=v;
+  });
+  return out;
+}
+function jbSave(){cloudDirty++;try{local.set(PEND_KEY,'1')}catch(_e){}clearTimeout(cloudTimer);cloudTimer=setTimeout(()=>{flushCloudSave().catch(()=>{})},150);}
+/* Save to JsonBin. Never shows a pop-up: if the connection drops it keeps retrying in the background until the bin has the data. */
+function flushCloudSave(strict){
+  clearTimeout(cloudTimer);cloudTimer=null;
+  const run=cloudWriteChain.then(async()=>{
+    if(!cloudCache||cloudDirty<=cloudSaved)return;
+    cloudBusy=true;let lastErr=null;
+    try{
+      for(let attempt=0;attempt<(strict?3:5);attempt++){
+        try{
+          const remote=await jbGet();
+          if(!cloudBase&&remote&&Array.isArray(remote.customers))setBase(remote);   /* first contact with the bin: never wipe what is already there */
+          const before=JSON.stringify(cloudCache);
+          const merged=mergeDB(cloudCache,remote,cloudBase);
+          const ver=cloudDirty,body=JSON.stringify(merged);
+          const r=await fetch(JB.url,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':JB.key,'X-Bin-Versioning':'false'},body,keepalive:body.length<60000});
+          if(!r.ok)throw new Error('JsonBin write failed ('+r.status+')');
+          cloudSaved=Math.max(cloudSaved,ver);setBase(merged);lastErr=null;
+          if(cloudDirty===ver){            /* nothing new happened while we were saving */
+            cloudCache=merged;try{local.set(DB_KEY,body);local.del(PEND_KEY)}catch(_e){}
+            if(body!==before&&typeof onCloudRec==='function')onCloudRec();   /* show what the other side changed */
+          }
+          break;
+        }catch(e){lastErr=e;await new Promise(res=>setTimeout(res,500*(attempt+1)));}
+      }
+    }finally{cloudBusy=false;}
+    if(lastErr){console.warn('JsonBin save will be retried:',lastErr);clearTimeout(cloudTimer);cloudTimer=setTimeout(()=>{flushCloudSave().catch(()=>{})},4000);if(strict)throw lastErr;return;}
+    if(cloudDirty>cloudSaved){clearTimeout(cloudTimer);cloudTimer=setTimeout(()=>{flushCloudSave().catch(()=>{})},150);}
+  });
+  cloudWriteChain=run.catch(()=>{});cloudSaving=cloudWriteChain;return run;
+}
+/* Force a JsonBin save NOW and wait for it (throws if the bin / key / connection is wrong). */
+async function flushCloud(){cloudDirty++;await flushCloudSave(true);}
+async function loadCloud(emptyFactory){
+  if(cloudLoaded)return cloudCache;
+  emptyFactory=emptyFactory||(()=>({v:2,seq:0,accOffset:Math.floor(Math.random()*90000000),issued:{},cids:{},customers:[],queue:[],log:[],outbox:[],banks:[]}));
+  const loc=(()=>{try{return JSON.parse(local.get(DB_KEY)||'null')}catch(_e){return null}})();
+  const localOk=!!(loc&&Array.isArray(loc.customers)),pend=local.get(PEND_KEY)==='1';
+  let storedBase=null;try{storedBase=JSON.parse(local.get(BASE_KEY)||'null')}catch(_e){}
+  let rec=null,failed=false;
+  for(let i=0;i<3;i++){try{rec=await jbGet();failed=false;break}catch(_e){failed=true;await new Promise(res=>setTimeout(res,400*(i+1)))}}
+  if(rec&&Array.isArray(rec.customers)){
+    if(pend&&localOk&&storedBase&&storedBase.cu){cloudBase=storedBase;cloudCache=mergeDB(loc,rec,storedBase);cloudDirty++;}   /* edits from last visit that never reached the bin */
+    else{cloudCache=rec;setBase(rec);}
+  }else if(failed){
+    /* bin unreachable right now: work from this device's copy and sync as soon as it is back */
+    if(localOk){cloudCache=loc;cloudBase=(storedBase&&storedBase.cu)?storedBase:null;if(pend&&cloudBase)cloudDirty++;}else cloudCache=emptyFactory();
+  }else{
+    cloudCache=localOk?loc:emptyFactory();cloudDirty++;      /* bin exists but is empty → initialise it */
+  }
+  cloudLoaded=true;try{local.set(DB_KEY,JSON.stringify(cloudCache))}catch(_e){}
+  if(typeof syncState==='function')syncState();
+  if(cloudDirty>cloudSaved)flushCloudSave().catch(()=>{});
+  return cloudCache;
+}
+async function pollCloud(onChange){if(cloudDirty>cloudSaved||cloudTimer||cloudBusy)return;try{const rec=await jbGet();if(cloudDirty>cloudSaved||cloudBusy||cloudTimer)return;if(rec&&Array.isArray(rec.customers)&&JSON.stringify(rec)!==JSON.stringify(cloudCache)){cloudCache=rec;setBase(rec);try{local.set(DB_KEY,JSON.stringify(rec))}catch(_e){}if(onChange)onChange(rec);}}catch(_e){}}
+/* safety net: anything still unsaved (dropped connection, tab hidden, phone locked) is pushed as soon as possible */
+setInterval(()=>{if(cloudCache&&cloudDirty>cloudSaved&&!cloudBusy&&!cloudTimer)flushCloudSave().catch(()=>{})},5000);
+window.addEventListener('online',()=>{if(cloudDirty>cloudSaved)flushCloudSave().catch(()=>{})});
+window.addEventListener('pagehide',()=>{if(cloudDirty>cloudSaved)flushCloudSave().catch(()=>{})});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&cloudDirty>cloudSaved)flushCloudSave().catch(()=>{})});
+function syncState(){if(!cloudCache)return;state.customers=cloudCache.customers||[];state.queue=cloudCache.queue||[];state.log=cloudCache.log||[];state.outbox=cloudCache.outbox||[];state.banks=cloudCache.banks||[];state.processedQueue=cloudCache.processedQueue||[];}
+function persist(){if(cloudCache){cloudCache.customers=state.customers;cloudCache.queue=state.queue;cloudCache.log=state.log;cloudCache.outbox=state.outbox;cloudCache.banks=state.banks;cloudCache.processedQueue=state.processedQueue||[];}jbSave();}
+/* Admin ⇄ Dashboard: every Admin action is saved to JsonBin and the Dashboard picks it up within about a second and a half */
+function onCloudRec(){syncState();if(state.user)render();}
+setInterval(()=>{if(state.user)pollCloud(onCloudRec);},1500);
+async function refreshNow(){ if(!state.user) return; await pollCloud(onCloudRec); render(); toast('Customers refreshed'); }
+document.addEventListener('visibilitychange', () => { if(!document.hidden && state.user) pollCloud(onCloudRec); });
+
+const AU_BANKS=[
+'Australia and New Zealand Banking Group (ANZ)','Commonwealth Bank of Australia','National Australia Bank (NAB)','Westpac Banking Corporation',
+'Capital Bank of Australia','St.George Bank','Bank of Melbourne','BankSA','Bankwest','Macquarie Bank','ING Australia','Suncorp Bank','Bank of Queensland (BOQ)',
+'Bendigo Bank','Adelaide Bank','AMP Bank','ME Bank','HSBC Australia','Citibank Australia','UBank','Up Bank','Judo Bank','Tyro Payments','Regional Australia Bank',
+'Beyond Bank Australia','Bank Australia','Auswide Bank','Heritage Bank','People\u2019s Choice Credit Union','Great Southern Bank','Teachers Mutual Bank','Qudos Bank',
+'Unity Bank','Police Bank','Newcastle Permanent Building Society','Greater Bank','Hume Bank','Defence Bank','Australian Military Bank','Community First Credit Union',
+'Horizon Credit Union','Illawarra Credit Union','IMB Bank','Summerland Credit Union','Southern Cross Credit Union','Service One Alliance Bank','Gateway Bank',
+'Australian Unity Bank','Bananacoast Community Credit Union','Big Sky Building Society','Bank First','BCU Bank','Border Bank','Central Murray Credit Union','Coastline Credit Union',
+'Community Alliance Credit Union','Connect Credit Union','Country Bank','Credit Union Australia (CUA)','Credit Union SA','Dnister Ukrainian Credit Co-operative',
+'Family First Credit Union','Fire Service Credit Union','First Choice Credit Union','First Option Bank','Goldfields Money','Holiday Coast Credit Union','Hunter United Credit Union',
+'Laboratories Credit Union','Lysaght Credit Union','Maritime Bank','Mutual Bank Australia','Nexus Mutual','Northern Inland Credit Union','Orange Credit Union','Pioneer Credit Union',
+'Queenslanders Credit Union','Railways Credit Union','Select Credit Union','South West Slopes Credit Union','Sutherland Credit Union','Traditional Credit Union','Victoria Teachers Mutual Bank',
+'WAW Credit Union','Westone Credit Union','Rabobank Australia','Rural Bank','Bank of New Zealand (BNZ)','ASB Bank','Bank of China (Australia)','Industrial and Commercial Bank of China (ICBC)',
+'China Construction Bank','Bank of Communications','Agricultural Bank of China','Bank of India (Australia)','State Bank of India','Standard Chartered Bank','Deutsche Bank','JPMorgan Chase',
+'Bank of America','BNP Paribas','UBS Australia','Barclays Australia','Mizuho Bank','MUFG Bank','Sumitomo Mitsui Banking Corporation','DBS Bank','OCBC Bank','United Overseas Bank (UOB)',
+'Maybank Australia','CIMB Bank','Cathay United Bank','Mega International Commercial Bank','KEB Hana Bank','Shinhan Bank','Woori Bank','Industrial Bank of Korea','Wise Australia','Revolut Australia','PayPal Australia'
+].sort((x,y)=>x.localeCompare(y));
+/* Dashboard-shaped customer helpers: the Dashboard stores accounts[] + tx[].
+   Admin balance = sum of all account balances. Admin tx = dashboard tx mapped. */
+const adminAccount = c => (c.accounts && c.accounts[0]) || { bsb:'062-000', number:'', balance:0 };
+const adminBalance = c => (c.accounts||[]).reduce((s,x)=>s+(+x.balance||0),0);
+const adminTx = c => (c.tx||[]).map(t=>({ id:t.id, t:t.ts, type:t.dir==='cr'?'credit':'debit', amt:t.amt, desc:t.desc||'' })).sort((x,y)=>y.t-x.t);
+const adminPushTx = (c, type, amt, desc, ts, accountId) => {
+  const acc = (c.accounts||[]).find(x=>x.id===accountId) || adminAccount(c); if(!acc.id) return;
+  const when = ts || Date.now();
+  acc.balance = Math.round(((+acc.balance||0) + (type==='credit'?amt:-amt))*100)/100;
+  (c.tx=c.tx||[]).unshift({ id:'t'+Date.now().toString(36)+Math.random().toString(36).slice(2,5), ts:when, acct:acc.id, dir:type==='credit'?'cr':'dr', amt, desc, cat:'Transfer', bal:acc.balance, ref:'CBA'+Date.now() });
+  (c.notifs=c.notifs||[]).unshift({ id:'n'+Date.now().toString(36), ts:when, title:type==='credit'?'Money received':'Money sent', body:`${aud.format(amt)} · ${desc}`, read:false });
+};
+
+const custName = c => `${c.first} ${c.last}`;
+const byId = id => state.customers.find(c => c.id === id);
+const isRestricted = c => c.restriction && c.restriction.until > Date.now();
+const pending = () => state.queue;
+function log(msg){ state.log.unshift({ t:Date.now(), msg }); state.log = state.log.slice(0, 20); persist(); }
+function notify(c, subject){
+  (c.thirdParty || []).forEach(tp => state.outbox.unshift({ t:Date.now(), to:tp.email, cid:c.id, subject }));
+  state.outbox = state.outbox.slice(0, 100); persist();
+}
+function post(c, type, amt, desc, ts, accountId){ adminPushTx(c, type, amt, desc, ts, accountId); notify(c, `${type === 'credit' ? 'Credit' : 'Debit'} of ${aud.format(amt)}: ${desc}`); persist(); }
+
+/* ============ Toast ============ */
+let toastTimer;
+function toast(msg, bad){
+  const el = $('toast');
+  el.textContent = msg;
+  el.classList.toggle('bad', !!bad);
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+}
+
+
+/* ============ Idle auto-logout: 3 minutes ============ */
+const IDLE_MS = 60 * 1000;
+let idleTimer = null;
+function idleReset(){
+  clearTimeout(idleTimer);
+  if (!state.user) return;
+  idleTimer = setTimeout(() => { if (state.user) logout('Signed out — you were idle for 60 seconds.'); }, IDLE_MS);
+}
+function idleStop(){ clearTimeout(idleTimer); idleTimer = null; }
+['pointerdown','keydown','wheel','touchstart','scroll'].forEach(ev =>
+  document.addEventListener(ev, idleReset, { passive: true }));
+document.addEventListener('visibilitychange', () => { if (!document.hidden) idleReset(); });
+
+/* ============ Sign in ============ */
+// Admin gate. This value is visible to anyone who views the page source.
+const ADMIN_PASSCODE = '202030';
+const CRED_KEY = 'cboa_admin_creds';
+function loadCreds(){ try { return JSON.parse(localStorage.getItem(CRED_KEY)); } catch (e) { return null; } }
+async function hashPw(p, salt){
+  /* Same PBKDF2 scheme as the Dashboard so Admin-created passwords log in there. */
+  if (salt && window.crypto && crypto.subtle) {
+    try{
+      const enc = new TextEncoder();
+      const k = await crypto.subtle.importKey('raw', enc.encode(p), 'PBKDF2', false, ['deriveBits']);
+      const bits = await crypto.subtle.deriveBits({ name:'PBKDF2', hash:'SHA-256', salt:enc.encode(salt), iterations:120000 }, k, 256);
+      return 'p:' + [...new Uint8Array(bits)].map(b=>b.toString(16).padStart(2,'0')).join('');
+    }catch(e){}
+  }
+  if (window.crypto && crypto.subtle) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(p));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  let h = 5381; for (const ch of p) h = ((h << 5) + h + ch.charCodeAt(0)) | 0;
+  return 'x' + h;
+}
+const randHex = n => [...crypto.getRandomValues(new Uint8Array(n))].map(x=>x.toString(16).padStart(2,'0')).join('');
+async function checkLogin(user, pass){
+  /* Password-only admin login. Password: 202030 */
+  return String(pass || '').trim() === ADMIN_PASSCODE;
+}
+
+$('loginForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const user = 'admin', pass = $('lgPass').value.trim();
+  if (!(await checkLogin(user, pass))) {
+    $('lgErr').textContent = 'Incorrect password. Please try again.';
+    $('lgPass').setAttribute('aria-invalid', 'true');
+    return;
+  }
+  $('lgPass').value = '';
+  $('lgErr').textContent = '';
+  $('lgPass').removeAttribute('aria-invalid');
+  state.user = user;
+  try { sessionStorage.setItem('cboa_admin_session', user); } catch(e) {}
+  idleReset();
+  $('loginView').hidden = true;
+  $('homeView').hidden = false;
+  try{ await loadCloud(); }catch(e){ toast('Could not reach JsonBin. Check your connection.', true); }
+  render();
+});
+
+/* ?reset=1 in the URL = same as Forgot passcode (clears any changed login + old session) */
+try {
+  if (new URLSearchParams(location.search).get('reset') === '1') {
+    localStorage.removeItem(CRED_KEY);
+    sessionStorage.removeItem('cboa_admin_session');
+    history.replaceState(null, '', location.pathname);
+  }
+} catch (e) {}
+
+/* Forgot passcode: clear any changed login details so the default works again */
+document.getElementById('forgotPass').addEventListener('click', e => {
+  e.preventDefault();
+  if (!confirm('Reset the Admin password to the default?')) return;
+  try { localStorage.removeItem(CRED_KEY); } catch (err) {}
+  try { sessionStorage.removeItem('cboa_admin_session'); } catch (err) {}
+  $('lgPass').value = '';
+  $('lgErr').textContent = 'Password reset to default.';
+  $('lgPass').focus();
+});
+
+/* Refresh keeps Admin logged in: restore the session from sessionStorage */
+(async function adminBoot(){
+  let saved = null;
+  try { saved = sessionStorage.getItem('cboa_admin_session'); } catch(e) {}
+  if (!saved) return;
+  state.user = saved;
+  $('loginView').hidden = true;
+  $('homeView').hidden = false;
+  idleReset();
+  try { await loadCloud(); } catch(e) { toast('Could not reach JsonBin. Check your connection.', true); }
+  render();
+})();
+
+function logout(msg){
+  idleStop();
+  try { sessionStorage.removeItem('cboa_admin_session'); } catch(e) {}
+  state.user = null;
+  closeSheet();
+  $('lgPass').value = '';
+  $('homeView').hidden = true;
+  $('loginView').hidden = false;
+  $('lgPass').focus();
+  toast(msg || 'Signed out');
+}
+
+/* ============ Home render ============ */
+function render(){
+  const total = state.customers.reduce((s, c) => s + adminBalance(c), 0);
+  const [dollars, cents] = aud.format(total).split('.');
+  $('figTotal').innerHTML = `${esc(dollars)}<span>.${esc(cents)}</span>`;
+  $('stCust').textContent = state.customers.length;
+  $('stPend').textContent = pending().length;
+  $('stRestr').textContent = state.customers.filter(isRestricted).length;
+
+  const n = pending().length;
+  const actions = [
+    ['create',  'plus',  'Create customer account', 'Open a new account'],
+    ['credit',  'up',    'Credit an account',       'Add funds with a reference'],
+    ['debit',   'down',  'Debit an account',        'Remove funds with a reference'],
+    ['restrict','lock',  'Restrict or unfreeze',    'Hold an account or lift a hold'],
+    ['queue',   'queue', 'Transfer approvals',      n ? `${n} awaiting review` : 'Nothing awaiting review'],
+    ['banks','lock','Banks', 'Add bank details customers can transfer to'],
+    ['delete','trash','Delete', 'Permanently delete a customer'],
+    ['authentication','lock','Authentication', 'Turn code verification on or off per customer'],
+    ['thirdparty','mail','Third party email',       'Copy account activity to another address'],
+    ['settings','cog','Settings',                  'Change admin login details'],
+  ];
+  $('actionRows').innerHTML = actions.map(([a, ic, t, s]) => `
+    <button class="row" data-act="${a}">
+      <span class="mark">${svg(ic)}</span>
+      <span class="txt"><div class="t">${t}</div><div class="s">${s}</div></span>
+      ${a === 'queue' && n ? `<span class="badge">${n}</span>` : ''}${chev}
+    </button>`).join('');
+
+  $('custRows').innerHTML = state.customers.length ? state.customers.map(c => `
+    <button class="row" data-act="customer" data-id="${esc(c.id)}">
+      <span class="txt"><div class="t">${esc(custName(c))}</div>
+        <div class="s">${isRestricted(c) ? '<span class="tag err">Restricted</span>' : '<span class="tag ok">Active</span>'}</div></span>
+      <span class="bal">${aud.format(adminBalance(c))}</span>${chev}
+    </button>`).join('') : '<div class="empty">No customers yet. Create the first account above.</div>';
+
+  $('logRows').innerHTML = state.log.length ? state.log.slice(0, 6).map(l => `
+    <div class="row" style="cursor:default">
+      <span class="txt"><div class="t" style="font-size:14.5px">${esc(l.msg)}</div><div class="s">${dt.format(l.t)}</div></span>
+    </div>`).join('') : '<div class="empty">Actions you take in this session will appear here.</div>';
+}
+
+/* ============ Sheet ============ */
+let lastFocus = null;
+function openSheet(title, html){
+  lastFocus = document.activeElement;
+  $('sheetTitle').textContent = title;
+  $('sheetBody').innerHTML = html;
+  $('sheet').classList.add('on');
+  $('sheet').setAttribute('aria-hidden', 'false');
+  $('scrim').classList.add('on');
+  $('sheetBody').scrollTop = 0;
+  const first = $('sheetBody').querySelector('input,select,textarea,button');
+  if (first) setTimeout(() => first.focus({ preventScroll:true }), 330);
+}
+function closeSheet(){
+  $('sheet').classList.remove('on');
+  $('sheet').setAttribute('aria-hidden', 'true');
+  $('scrim').classList.remove('on');
+  if (lastFocus && lastFocus.focus) lastFocus.focus();
+}
+$('scrim').addEventListener('click', closeSheet);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+
+const customerOptions = (selected) =>
+  `<option value="">Select a customer</option>` +
+  state.customers.map(c => `<option value="${esc(c.id)}" ${c.id === selected ? 'selected' : ''}>${esc(custName(c))}</option>`).join('');
+
+function setErr(id, msg){
+  const el = $(id);
+  el.setAttribute('aria-invalid', 'true');
+  const e = $(id + 'Err');
+  if (e) e.textContent = msg;
+  el.focus();
+  return false;
+}
+function clearErrs(root){
+  root.querySelectorAll('[aria-invalid]').forEach(el => el.removeAttribute('aria-invalid'));
+  root.querySelectorAll('.err').forEach(el => el.textContent = '');
+}
+
+/* ----- Create customer ----- */
+/* ----- Create customer (creates a real Dashboard login in JsonBin) ----- */
+function sheetCreate(){
+  openSheet('New customer', `
+    <div class="two">
+      <div class="field"><label for="nFirst">First name</label><input id="nFirst" class="input" autocomplete="off"><div class="err" id="nFirstErr"></div></div>
+      <div class="field"><label for="nLast">Last name</label><input id="nLast" class="input" autocomplete="off"><div class="err" id="nLastErr"></div></div>
+    </div>
+    <div class="field"><label for="nEmail">Email</label><input id="nEmail" class="input" type="email" placeholder="name@example.com"><div class="err" id="nEmailErr"></div></div>
+    <div class="field"><label for="nPass">Temporary password for the customer</label><input id="nPass" class="input" type="password" autocomplete="new-password"><div class="hint">The customer uses this + their email / Customer ID to log in to the Dashboard. At least 8 characters.</div><div class="err" id="nPassErr"></div></div>
+    <div class="field"><label for="nDob">Date of birth</label><input id="nDob" class="input" type="date"><div class="err" id="nDobErr"></div></div>
+    <div class="field"><label for="nMobile">Mobile</label><input id="nMobile" class="input" inputmode="tel" placeholder=""><div class="err" id="nMobileErr"></div></div>
+    <div class="field"><label for="nAddr">Address <span style="color:var(--mist)">(optional)</span></label><input id="nAddr" class="input" placeholder="Street and suburb"></div>
+    <button class="btn primary" data-act="doCreate">Create account</button>
+    <button class="btn quiet" data-act="closeSheet">Cancel</button>`);
+}
+async function doCreate(){
+  const body = $('sheetBody'); clearErrs(body);
+  const first = $('nFirst').value.trim(), last = $('nLast').value.trim();
+  const email = $('nEmail').value.trim().toLowerCase(), dob = $('nDob').value;
+  const mobile = $('nMobile').value.replace(/\s/g, '');
+  const pass = $('nPass').value;
+  if (!first) return setErr('nFirst', 'Enter a first name.');
+  if (!last) return setErr('nLast', 'Enter a last name.');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setErr('nEmail', 'Enter a valid email address.');
+  if (state.customers.some(c => (c.email||'').toLowerCase() === email)) return setErr('nEmail', 'A customer with this email already exists.');
+  if (!pass || pass.length < 8) return setErr('nPass', 'Use at least 8 characters.');
+  if (!dob || new Date(dob) > new Date()) return setErr('nDob', 'Enter a valid date of birth.');
+  if (!/^\+?\d{7,15}$/.test(mobile.replace(/[\-()]/g, ''))) return setErr('nMobile', 'Enter a valid mobile number.');
+  if (!cloudCache) { try { await loadCloud(); } catch(e) { return toast('Could not reach JsonBin. Check your connection and try again.', true); } }
+  const db = cloudCache;
+  db.seq = (db.seq||0) + 1;
+  let number, guard = 0;
+  do { db.seq++; const n = (db.accOffset + (db.seq % 90000000) * 48271379) % 90000000; number = String(10000000 + n); } while (db.issued && db.issued[number] && ++guard < 1000);
+  let cid; do { cid = String(10000000 + Math.floor(Math.random()*90000000)); } while (db.cids && db.cids[cid]);
+  db.cids[cid] = 1; db.issued[number] = cid;
+  const salt = randHex(16), pwHash = await hashPw(pass, salt);
+  const c = { id:'c_'+cid, cid, title:'Mr', first, middle:'', last, email, mobile:$('nMobile').value.trim(), dob, gender:'', address:$('nAddr').value.trim(),
+    pwHash, salt, photo:null, face:null, created:Date.now(),
+    accounts:[{ id:'a_'+number, type:'everyday', name:'Everyday', bsb:'062-000', number, balance:0, opened:Date.now() }],
+    debit:{ last4:String(1000 + Math.floor(Math.random()*9000)) }, credit:null,
+    tx:[], payees:[], goals:[], requests:[], notifs:[], deposits:[], travel:{}, enquiries:[], extraCards:[], cardState:{},
+    settings:{ scam:true, newPayee:true, roundup:false }, limits:{ daily:5000 }, rewards:0,
+    restriction:null, thirdParty:[], fails:0, lockLevel:0, lockUntil:0 };
+  state.customers.push(c);
+  log(`Created account for ${custName(c)} (Customer ID ${cid})`);
+  persist(); closeSheet(); render();
+  toast('Account created — Customer ID ' + cid);
+}
+
+
+/* ----- Credit / debit ----- */
+function sheetTx(mode){
+  const word = mode === 'credit' ? 'Credit' : 'Debit';
+  openSheet(`${word} an account`, `
+    <div class="field"><label for="tCust">Customer</label><select id="tCust" class="input" data-mode="${mode}">${customerOptions()}</select><div class="err" id="tCustErr"></div></div>
+    <div class="field"><label for="tAmt">Amount (AUD)</label><input id="tAmt" class="input" type="number" step="0.01" min="0" inputmode="decimal" placeholder="0.00"><div class="err" id="tAmtErr"></div></div>
+    <div class="field"><label for="tDate">Transaction date</label><input id="tDate" class="input" type="date"><div class="hint">The date shown on the customer's statement. Can be before or after today.</div><div class="err" id="tDateErr"></div></div>
+    <div class="field"><label for="tDesc">Reference</label><input id="tDesc" class="input" maxlength="60" placeholder="${mode === 'credit' ? 'Salary deposit' : 'Fee adjustment'}"><div class="hint">Shown to the customer on their statement.</div><div class="err" id="tDescErr"></div></div>
+    <div class="review" id="tReview">Choose a customer and amount to review.</div>
+    <button class="btn primary" id="tGo" data-act="doTx" data-mode="${mode}">${word} account</button>
+    <button class="btn quiet" data-act="closeSheet">Cancel</button>`);
+  ['tCust','tAmt','tDesc'].forEach(id => $(id).addEventListener('input', () => updateReview(mode)));
+  try { $('tDate').valueAsDate = new Date(); } catch(e) {}
+}
+function updateReview(mode){
+  const c = byId($('tCust').value), amt = parseFloat($('tAmt').value);
+  if (!c || !(amt > 0)) { $('tReview').textContent = 'Choose a customer and amount to review.'; return; }
+  const after = adminBalance(c) + (mode === 'credit' ? amt : -amt);
+  $('tReview').innerHTML = `${mode === 'credit' ? 'Credit' : 'Debit'} <b>${aud.format(amt)}</b> ${mode === 'credit' ? 'to' : 'from'} ${esc(custName(c))}.<br>
+    <span style="color:var(--mist)">Balance after: ${aud.format(after)}</span>`;
+}
+function doTx(mode){
+  clearErrs($('sheetBody'));
+  const c = byId($('tCust').value);
+  const amt = Math.round(parseFloat($('tAmt').value) * 100) / 100;
+  const desc = $('tDesc').value.trim();
+  const dateVal = $('tDate') ? $('tDate').value : '';
+  let txTs = null;
+  if (dateVal) { const parsed = new Date(dateVal + 'T12:00:00'); if (isNaN(parsed)) return setErr('tDate', 'Enter a valid date.'); txTs = parsed.getTime(); }
+  if (!c) return setErr('tCust', 'Select a customer.');
+  if (!(amt > 0)) return setErr('tAmt', 'Enter an amount greater than zero.');
+  if (mode === 'debit' && amt > adminBalance(c)) return setErr('tAmt', `Amount exceeds the available balance of ${aud.format(adminBalance(c))}.`);
+  if (!desc) return setErr('tDesc', 'Enter a reference.');
+  post(c, mode, amt, desc, txTs);
+  log(`${mode === 'credit' ? 'Credited' : 'Debited'} ${aud.format(amt)} ${mode === 'credit' ? 'to' : 'from'} ${custName(c)}`);
+  closeSheet(); render();
+  toast(mode === 'credit' ? 'Account credited' : 'Account debited');
+}
+
+/* ----- Restrict / unfreeze ----- */
+function sheetRestrict(selected){
+  openSheet('Restrict or unfreeze', `
+    <div class="field"><label for="rCust">Customer</label><select id="rCust" class="input">${customerOptions(selected)}</select><div class="err" id="rCustErr"></div></div>
+    <div id="rPanel"></div>`);
+  $('rCust').addEventListener('change', drawRestrictPanel);
+  drawRestrictPanel();
+}
+function drawRestrictPanel(){
+  const c = byId($('rCust').value), p = $('rPanel');
+  if (!c) { p.innerHTML = '<p class="hint" style="margin-bottom:14px">Select a customer to see their current status.</p><button class="btn quiet" data-act="closeSheet">Cancel</button>'; return; }
+  if (isRestricted(c)) {
+    p.innerHTML = `
+      <div class="review">Restricted until <b>${dday.format(c.restriction.until)}</b>.<br><span style="color:var(--mist)">Reason shown to customer: ${esc(c.restriction.reason)}</span></div>
+      <button class="btn primary" data-act="doUnfreeze">Lift restriction</button>
+      <button class="btn quiet" data-act="closeSheet">Cancel</button>`;
+  } else {
+    p.innerHTML = `
+      <div class="field"><label for="rReason">Reason shown to the customer</label><textarea id="rReason" class="input" maxlength="140" placeholder="Account under review"></textarea><div class="err" id="rReasonErr"></div></div>
+      <div class="field"><label for="rDays">Length of restriction (days)</label><input id="rDays" class="input" type="number" min="1" max="365" value="14" inputmode="numeric"><div class="err" id="rDaysErr"></div></div>
+      <button class="btn danger" data-act="doRestrict">Restrict account</button>
+      <button class="btn quiet" data-act="closeSheet">Cancel</button>`;
+  }
+}
+function doRestrict(){
+  clearErrs($('sheetBody'));
+  const c = byId($('rCust').value);
+  const reason = $('rReason').value.trim(), days = parseInt($('rDays').value, 10);
+  if (reason.length < 5) return setErr('rReason', 'Enter a reason of at least 5 characters.');
+  if (!(days >= 1 && days <= 365)) return setErr('rDays', 'Enter a length between 1 and 365 days.');
+  c.restriction = { reason, until: Date.now() + days * DAY }; persist();
+  notify(c, `Account restricted: ${reason}`);
+  log(`Restricted ${custName(c)} for ${days} day${days === 1 ? '' : 's'}`);
+  closeSheet(); render(); toast('Account restricted');
+}
+function doUnfreeze(){
+  const c = byId($('rCust').value);
+  c.restriction = null; persist();
+  notify(c, 'Account restriction lifted');
+  log(`Lifted restriction on ${custName(c)}`);
+  closeSheet(); render(); toast('Restriction lifted');
+}
+
+/* ----- Approval queue ----- */
+function sheetQueue(){
+  const q = pending();
+  openSheet('Transfer approvals', q.length ? q.map(i => {
+    const c = byId(i.cid); if(!c) return '';
+    return `<div class="queue-item">
+      <div class="top-line"><span class="who">${esc(custName(c))}</span><span class="amt">${aud.format(i.amt)}</span></div>
+      <div class="ref">To ${esc(i.to)}${i.bank ? ' · ' + esc(i.bank) : ''}. ${esc(i.ref)}. ${dt.format(i.t)}</div>
+      <div class="acts">
+        <button class="btn quiet" data-act="decline" data-id="${esc(i.id)}">Decline</button>
+        <button class="btn primary" data-act="approve" data-id="${esc(i.id)}">Approve</button>
+      </div></div>`;
+  }).join('') : '<div class="empty">No transfers are waiting for approval.</div>');
+}
+function resolveTransfer(id, approve){
+  const i = state.queue.find(x => x.id === id); if (!i) return;
+  state.processedQueue=state.processedQueue||[];
+  if(state.processedQueue.includes(id)){
+    state.queue=state.queue.filter(x=>x.id!==id);persist();render();sheetQueue();return toast('This request was already processed.');
+  }
+  const c = byId(i.cid); if(!c) return toast('Customer record not found.', true);
+  if (approve) {
+    if (isRestricted(c)) return toast(`${custName(c)} is restricted. Lift the restriction first.`, true);
+    const source=(c.accounts||[]).find(a=>a.id===i.from);
+    if(!source) return toast('The selected source account could not be found.',true);
+    if (+i.amt > (+source.balance||0)) return toast('Insufficient balance in the selected source account.', true);
+    post(c, 'debit', +i.amt, `Transfer to ${i.to}`, Date.now(), i.from);
+    log(`Approved ${aud.format(i.amt)} transfer for ${custName(c)}`);
+  } else {
+    notify(c, `Transfer of ${aud.format(i.amt)} to ${i.to} declined`);
+    log(`Declined ${aud.format(i.amt)} transfer for ${custName(c)}`);
+  }
+  state.processedQueue.push(id);state.processedQueue=state.processedQueue.slice(-500);
+  state.queue = state.queue.filter(x => x.id !== id);
+  persist(); render(); sheetQueue();
+  toast(approve ? 'Transfer approved' : 'Transfer declined');
+}
+
+/* ----- Customer detail ----- */
+function sheetCustomer(id){
+  const c = byId(id); if (!c) return;
+  const recent = adminTx(c).slice(0, 5); const acc = adminAccount(c);
+  openSheet(custName(c), `
+    <div class="kv"><span>Status</span><span>${isRestricted(c) ? `<span class="tag err">Restricted until ${dday.format(c.restriction.until)}</span>` : '<span class="tag ok">Active</span>'}</span></div>
+    <div class="kv"><span>Customer ID</span><span>${esc(c.cid||'')}</span></div>
+    <div class="kv"><span>Balance</span><span style="font-family:var(--serif);font-size:17px">${aud.format(adminBalance(c))}</span></div>
+    <div class="kv"><span>BSB</span><span>${esc(acc.bsb)}</span></div>
+    <div class="kv"><span>Account number</span><span>${esc(String(acc.number||'').replace(/(\d{3})(?=\d)/g, '$1 '))}</span></div>
+    <div class="kv"><span>Email</span><span>${esc(c.email)}</span></div>
+    <div class="kv"><span>Mobile</span><span>${esc(c.mobile)}</span></div>
+    ${c.address ? `<div class="kv"><span>Address</span><span>${esc(c.address)}</span></div>` : ''}
+    <h3 class="section-title" style="padding:18px 0 4px">Recent transactions</h3>
+    ${recent.length ? recent.map(t => `<div class="kv"><span>${esc(t.desc)}<br><small>${dt.format(t.t)}</small></span><span style="color:${t.type === 'credit' ? 'var(--ok)' : 'var(--ivory)'}">${t.type === 'credit' ? '+' : '−'}${aud.format(t.amt)}</span></div>`).join('') : '<div class="empty" style="padding-left:0">No transactions yet.</div>'}
+    <h3 class="section-title" style="padding:18px 0 4px">Edit transaction dates</h3>
+    <p class="hint" style="margin-bottom:8px">Change the date shown on the customer's statement for any transaction. Past or future dates are allowed.</p>
+    ${(c.tx||[]).length ? (c.tx||[]).slice().sort((x,y)=>y.ts-x.ts).map(t => `<div class="kv"><span>${esc(t.desc||'')}<br><small>${aud.format(t.amt)} · ${t.dir === 'cr' ? 'Credit' : 'Debit'}</small></span><span><input type="date" class="input" style="width:150px" data-txdate="${esc(t.id)}" value="${new Date(t.ts).toISOString().slice(0,10)}"></span></div>`).join('') : '<div class="empty" style="padding-left:0">No transactions yet.</div>'}
+    ${(c.tx||[]).length ? `<button class="btn primary" data-act="saveTxDates" data-id="${esc(c.id)}" style="margin-top:10px">Save transaction dates</button>` : ''}
+    <div style="height:18px"></div>
+    <button class="btn primary" data-act="editCustomer" data-id="${esc(c.id)}">Edit customer details</button>
+    <button class="btn primary" data-act="copyDetails" data-id="${esc(c.id)}">Copy account details</button>
+    <button class="btn quiet" data-act="restrictFor" data-id="${esc(c.id)}">${isRestricted(c) ? 'Manage restriction' : 'Restrict account'}</button>`);
+}
+function copyDetails(id){
+  const c = byId(id);
+  const acc = adminAccount(c); const text = `Account name: ${custName(c)}\nCustomer ID: ${c.cid||''}\nBSB: ${acc.bsb}\nAccount number: ${acc.number}`;
+  if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => toast('Details copied'), () => toast('Copy was blocked by the browser', true));
+  else toast('Copy is not supported here', true);
+}
+
+
+function saveTxDates(id){
+  const c = byId(id); if (!c) return;
+  let changed = 0;
+  document.querySelectorAll('[data-txdate]').forEach(inp => {
+    const t = (c.tx||[]).find(x => String(x.id) === inp.dataset.txdate);
+    if (!t || !inp.value) return;
+    const parsed = new Date(inp.value + 'T12:00:00');
+    if (isNaN(parsed)) return;
+    if (parsed.getTime() !== t.ts) { t.ts = parsed.getTime(); changed++; }
+  });
+  if (!changed) return toast('No dates changed');
+  persist();
+  log(`Updated transaction dates for ${custName(c)}`);
+  sheetCustomer(id); toast('Transaction dates saved');
+}
+
+
+
+/* ----- Edit ANY customer details ----- */
+function sheetEditCustomer(id){
+  const c = byId(id); if (!c) return;
+  const acc = adminAccount(c);
+  const sel = (val, opts) => opts.map(o => `<option value="${o}" ${String(val) === o ? 'selected' : ''}>${o}</option>`).join('');
+  openSheet('Edit customer details', `
+    <p class="hint" style="margin-bottom:14px">Change anything below. Leave the password blank to keep the current one. Saving updates the customer everywhere, including the Dashboard.</p>
+    <div class="field"><label for="eTitle">Title</label><select id="eTitle" class="input">${sel(c.title || 'Mr', ['Mr','Mrs','Ms','Miss','Dr'])}</select></div>
+    <div class="field"><label for="eFirst">First name</label><input id="eFirst" class="input" value="${esc(c.first || '')}"><div class="err" id="eFirstErr"></div></div>
+    <div class="field"><label for="eMiddle">Middle name</label><input id="eMiddle" class="input" value="${esc(c.middle || '')}"></div>
+    <div class="field"><label for="eLast">Last name</label><input id="eLast" class="input" value="${esc(c.last || '')}"><div class="err" id="eLastErr"></div></div>
+    <div class="field"><label for="eEmail">Email</label><input id="eEmail" class="input" type="email" value="${esc(c.email || '')}"><div class="err" id="eEmailErr"></div></div>
+    <div class="field"><label for="eMobile">Mobile</label><input id="eMobile" class="input" inputmode="tel" value="${esc(c.mobile || '')}"><div class="err" id="eMobileErr"></div></div>
+    <div class="field"><label for="eDob">Date of birth</label><input id="eDob" class="input" type="date" value="${esc(c.dob || '')}"><div class="err" id="eDobErr"></div></div>
+    <div class="field"><label for="eGender">Gender</label><select id="eGender" class="input">${sel(c.gender || '', ['', 'Female', 'Male', 'Non-binary', 'Prefer not to say'])}</select></div>
+    <div class="field"><label for="eAddr">Address</label><input id="eAddr" class="input" value="${esc(c.address || '')}"></div>
+    <div class="field"><label for="eCid">Customer ID</label><input id="eCid" class="input" inputmode="numeric" value="${esc(c.cid || '')}"><div class="err" id="eCidErr"></div></div>
+    <div class="field"><label for="eBsb">BSB / routing number</label><input id="eBsb" class="input" inputmode="numeric" maxlength="10" value="${esc(acc.bsb || '')}"><div class="err" id="eBsbErr"></div></div>
+    <div class="field"><label for="eAcc">Account number</label><input id="eAcc" class="input" inputmode="numeric" maxlength="10" value="${esc(acc.number || '')}"><div class="err" id="eAccErr"></div></div>
+    <div class="field"><label for="eBal">Balance ($)</label><input id="eBal" class="input" inputmode="decimal" value="${adminBalance(c).toFixed(2)}"><div class="err" id="eBalErr"></div></div>
+    <div class="field"><label for="ePass">New password <span style="color:var(--mist)">(blank = keep current)</span></label><input id="ePass" class="input" type="password" autocomplete="new-password"><div class="err" id="ePassErr"></div></div>
+    <div class="field"><label>Code verification</label><label class="check" style="display:flex;gap:10px;align-items:center"><input id="eAuth" type="checkbox" ${c.authOff ? '' : 'checked'}> <span>Require email code at login (uncheck = customer logs in without a code)</span></label></div>
+    <button class="btn primary" data-act="saveEditCustomer" data-id="${esc(c.id)}">Save changes</button>
+    <button class="btn quiet" data-act="closeSheet">Cancel</button>`);
+}
+async function saveEditCustomer(id){
+  const c = byId(id); if (!c) return;
+  const acc = adminAccount(c);
+  const v = x => $(x).value.trim();
+  const first = v('eFirst'), middle = v('eMiddle'), last = v('eLast');
+  const email = v('eEmail').toLowerCase(), mobile = v('eMobile').replace(/\s/g, '');
+  const dob = v('eDob'), cid = v('eCid'), bsb = v('eBsb').replace(/\D/g, ''), number = v('eAcc').replace(/\D/g, '');
+  const bal = parseFloat(v('eBal').replace(/[$,]/g, ''));
+  const pass = $('ePass').value;
+  if (!first) return setErr('eFirst', 'Enter a first name.');
+  if (!last) return setErr('eLast', 'Enter a last name.');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setErr('eEmail', 'Enter a valid email address.');
+  if (state.customers.some(x => x.id !== c.id && (x.email || '').toLowerCase() === email)) return setErr('eEmail', 'Another customer already uses this email.');
+  if (mobile && !/^\+?\d{7,15}$/.test(mobile.replace(/[\-()]/g, ''))) return setErr('eMobile', 'Enter a valid mobile number.');
+  if (dob && new Date(dob) > new Date()) return setErr('eDob', 'Enter a valid date of birth.');
+  if (!cid) return setErr('eCid', 'Enter a Customer ID.');
+  if (state.customers.some(x => x.id !== c.id && String(x.cid) === cid)) return setErr('eCid', 'Another customer already uses this Customer ID.');
+  if (!/^\d{4,10}$/.test(bsb)) return setErr('eBsb', 'Enter a BSB of 4 to 10 digits.');
+  if (!/^\d{4,10}$/.test(number)) return setErr('eAcc', 'Enter an account number of 4 to 10 digits.');
+  if (isNaN(bal) || bal < 0) return setErr('eBal', 'Enter a valid balance of 0 or more.');
+  if (pass && pass.length < 8) return setErr('ePass', 'Use at least 8 characters, or leave blank.');
+  // Customer ID change: move the cids entry so the new ID can log in
+  if (cloudCache && cloudCache.cids && String(c.cid) !== cid) { delete cloudCache.cids[c.cid]; cloudCache.cids[cid] = 1; }
+  if (cloudCache && cloudCache.issued && acc.number && String(acc.number) !== number) { delete cloudCache.issued[acc.number]; cloudCache.issued[number] = cid; }
+  Object.assign(c, { title: $('eTitle').value, first, middle, last, email, mobile: v('eMobile'), dob, gender: $('eGender').value, address: v('eAddr'), cid, authOff: !$('eAuth').checked });
+  if (acc.id) Object.assign(acc, { bsb, number, balance: Math.round(bal * 100) / 100 });
+  else (c.accounts = c.accounts || []).push({ id: 'a_' + number, type: 'everyday', name: 'Everyday', bsb, number, balance: Math.round(bal * 100) / 100, opened: Date.now() });
+  if (pass) { const salt = randHex(16); c.salt = salt; c.pwHash = await hashPw(pass, salt); }
+  persist();
+  log(`Updated details for ${custName(c)} (Customer ID ${cid})`);
+  closeSheet(); render();
+  toast('Customer details saved');
+}
+
+/* ----- Authentication: per-customer code verification ON/OFF ----- */
+function sheetAuth(){
+  openSheet('Authentication', `
+    <p class="hint" style="margin-bottom:8px">Choose a customer. If code verification is OFF, they log in with Customer ID/email + password only — no email code.</p>
+    <div class="rows" style="margin:0">${state.customers.length ? state.customers.map(c => `
+      <button class="row" data-act="authCustomer" data-id="${esc(c.id)}">
+        <span class="txt"><div class="t">${esc(custName(c))}</div><div class="s">${c.authOff ? '<span class="tag err">Code verification OFF</span>' : '<span class="tag ok">Code verification ON</span>'}</div></span>${chev}
+      </button>`).join('') : '<div class="empty">No customers yet.</div>'}</div>`);
+}
+function sheetAuthCustomer(id){
+  const c = byId(id); if (!c) return;
+  const off = !!c.authOff;
+  openSheet(custName(c), `
+    <button class="btn quiet" data-act="authentication" style="height:40px;font-size:14px;margin-bottom:14px">Back to customers</button>
+    <p class="hint" style="margin-bottom:14px">Code verification (email code after password) is currently <b style="color:var(--ivory)">${off ? 'OFF' : 'ON'}</b> for this customer.</p>
+    <div class="review">${off ? 'This customer logs in with Customer ID/email + password only. No code is sent.' : 'This customer must enter the 6-digit email code after their password to log in.'}</div>
+    <button class="btn primary" data-act="authToggle" data-id="${esc(c.id)}">${off ? 'Turn code verification ON' : 'Turn code verification OFF'}</button>
+    <button class="btn quiet" data-act="closeSheet">Cancel</button>`);
+}
+function authToggle(id){
+  const c = byId(id); if (!c) return;
+  /* Authentication state changes only from this explicit admin action. */
+  c.authOff = c.authOff !== true;
+  persist();
+  log(`${c.authOff ? 'Turned OFF' : 'Turned ON'} code verification for ${custName(c)}`);
+  sheetAuthCustomer(id);
+  toast(c.authOff ? 'Code verification turned OFF' : 'Code verification turned ON');
+}
+
+/* ----- Third party email ----- */
+function sheetTP(){
+  openSheet('Third party email', `
+    <p class="hint" style="margin-bottom:8px">Choose a customer to manage who receives copies of their account activity.</p>
+    <div class="rows" style="margin:0">${state.customers.length ? state.customers.map(c => {
+      const n = (c.thirdParty || []).length;
+      return `<button class="row" data-act="tpCustomer" data-id="${esc(c.id)}">
+        <span class="txt"><div class="t">${esc(custName(c))}</div><div class="s">${n ? `${n} third party email${n === 1 ? '' : 's'}` : 'None added'}</div></span>${chev}</button>`;
+    }).join('') : '<div class="empty">No customers yet.</div>'}</div>`);
+}
+function sheetTPCustomer(id){
+  const c = byId(id); if (!c) return;
+  c.thirdParty = c.thirdParty || [];
+  const sent = state.outbox.filter(o => o.cid === c.id).slice(0, 5);
+  openSheet(custName(c), `
+    <button class="btn quiet" data-act="tpBack" style="height:40px;font-size:14px;margin-bottom:14px">Back to customers</button>
+    <h3 class="section-title" style="padding:0 0 4px">Third party emails</h3>
+    ${c.thirdParty.length ? c.thirdParty.map(tp => `
+      <div class="kv" style="align-items:center"><span style="color:var(--ivory)">${esc(tp.email)}<br><small style="color:var(--mist)">Added ${dday.format(tp.added)}</small></span>
+      <button class="tag err" data-act="tpRemove" data-id="${esc(c.id)}" data-email="${esc(tp.email)}" aria-label="Remove ${esc(tp.email)}">Remove</button></div>`).join('')
+      : '<div class="empty" style="padding-left:0">No third party email yet.</div>'}
+    <h3 class="section-title" style="padding:20px 0 8px">Add third party email</h3>
+    <div class="field"><label for="tpEmail">Email address</label><input id="tpEmail" class="input" type="email" placeholder="name@example.com" autocomplete="off"><div class="err" id="tpEmailErr"></div></div>
+    <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.45;margin-bottom:6px;color:var(--ivory)">
+      <input type="checkbox" id="tpConsent" style="margin-top:3px;accent-color:#cfae6f;width:18px;height:18px;flex:none">
+      <span>The customer has agreed to this address receiving copies of their account activity.</span></label>
+    <div class="err" id="tpConsentErr" style="margin-bottom:12px"></div>
+    <button class="btn primary" data-act="tpAdd" data-id="${esc(c.id)}">Add third party email</button>
+    <h3 class="section-title" style="padding:22px 0 4px">Copies sent</h3>
+    <p class="hint" style="margin-bottom:6px">Copies are recorded here.</p>
+    ${sent.length ? sent.map(o => `<div class="kv"><span>${esc(o.subject)}<br><small>To ${esc(o.to)}</small></span><span><small>${dt.format(o.t)}</small></span></div>`).join('') : '<div class="empty" style="padding-left:0">Nothing sent yet. Activity on this account will appear here.</div>'}`);
+}
+function tpAdd(id){
+  const c = byId(id); if (!c) return;
+  clearErrs($('sheetBody'));
+  const email = $('tpEmail').value.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setErr('tpEmail', 'Enter a valid email address.');
+  if (email === c.email.toLowerCase()) return setErr('tpEmail', "This is already the customer's own email.");
+  if (c.thirdParty.some(t => t.email === email)) return setErr('tpEmail', 'This address has already been added.');
+  if (c.thirdParty.length >= 3) return setErr('tpEmail', 'A customer can have up to 3 third party emails.');
+  if (!$('tpConsent').checked) { $('tpConsentErr').textContent = 'Confirm the customer has agreed before adding.'; return; }
+  c.thirdParty.push({ email, added: Date.now() }); persist();
+  log(`Added third party email for ${custName(c)}`);
+  sheetTPCustomer(id); toast('Third party email added');
+}
+function tpRemove(id, email){
+  const c = byId(id); if (!c) return;
+  c.thirdParty = (c.thirdParty || []).filter(t => t.email !== email); persist();
+  log(`Removed third party email for ${custName(c)}`);
+  sheetTPCustomer(id); toast('Third party email removed');
+}
+
+
+/* ----- Banks: Admin-stored bank details (shared via JsonBin) ----- */
+function sheetBanks(){
+  openSheet('Banks', `
+    <p class="hint" style="margin-bottom:14px">Add a bank account here. When a customer enters this exact routing number + account number + bank in Transfer, the account name appears automatically and the transfer debits immediately after their PIN.</p>
+    <div class="field"><label for="bBank">Select bank</label><select id="bBank" class="input"><option value="">Select bank</option>${AU_BANKS.map(b=>`<option>${esc(b)}</option>`).join('')}</select><div class="err" id="bBankErr"></div></div>
+    <div class="field"><label for="bRout">Routing number (BSB)</label><input id="bRout" class="input" inputmode="numeric" maxlength="10" placeholder="4 to 10 digits" autocomplete="off"><div class="err" id="bRoutErr"></div></div>
+    <div class="field"><label for="bAcc">Account number</label><input id="bAcc" class="input" inputmode="numeric" maxlength="10" placeholder="4 to 10 digits" autocomplete="off"><div class="err" id="bAccErr"></div></div>
+    <div class="field"><label for="bName">Account name</label><input id="bName" class="input" maxlength="60" placeholder="e.g. Jane Smith" autocomplete="off"><div class="err" id="bNameErr"></div></div>
+    <button class="btn primary" id="bGen" data-act="bankGenerate">Generate</button>
+    <div class="review success" id="bResult" hidden style="margin-top:16px"></div>
+    <h3 class="section-title" style="padding:26px 0 4px">Saved bank details</h3>
+    <div class="rows" style="margin:0" id="bankList"></div>`);
+  $('bRout').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g,'').slice(0,10); });
+  $('bAcc').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g,'').slice(0,10); });
+  drawBankList();
+}
+function drawBankList(){
+  const el = $('bankList'); if(!el) return;
+  el.innerHTML = state.banks.length ? state.banks.map(b => `
+    <div class="row" style="cursor:default">
+      <span class="txt"><div class="t">${esc(b.bank)}</div><div class="s">${esc(b.name)} · BSB ${esc(b.routing)} · Acc ${esc(b.number)}</div></span>
+      <button class="tag err" data-act="bankDelete" data-id="${esc(b.id)}">Delete</button>
+    </div>`).join('') : '<div class="empty">No bank details saved yet.</div>';
+}
+let bankBusy = false;
+function bankGenerate(){
+  if (bankBusy) return;
+  clearErrs($('sheetBody'));
+  const bank = $('bBank').value, routing = $('bRout').value, number = $('bAcc').value, name = $('bName').value.trim();
+  if (!bank) return setErr('bBank', 'Select a bank.');
+  if (!/^\d{4,10}$/.test(routing)) return setErr('bRout', 'Enter a routing number of 4 to 10 digits.');
+  if (!/^\d{4,10}$/.test(number)) return setErr('bAcc', 'Enter an account number of 4 to 10 digits.');
+  if (name.length < 2) return setErr('bName', 'Enter the account name.');
+  if (state.banks.some(b => b.bank === bank && b.routing === routing && b.number === number)) return setErr('bAcc', 'These bank details are already saved.');
+  bankBusy = true;
+  const btn = $('bGen'); btn.disabled = true; btn.innerHTML = '<span class="spin"></span>Generating';
+  $('bResult').hidden = true;
+  setTimeout(() => {
+    const rec = { id:'bk'+Date.now(), bank, routing, number, name, t:Date.now() };
+    state.banks.unshift(rec); persist();
+    log(`Saved bank details for ${name} at ${bank}`);
+    bankBusy = false;
+    if ($('bGen')) { $('bGen').disabled = false; $('bGen').textContent = 'Generate'; }
+    const r = $('bResult');
+    if (r) { r.innerHTML = `<div class="ttl">Confirmed</div>${esc(bank)}<br><b>${esc(name)}</b><br><span style="color:var(--mist)">Routing ${esc(routing)}<br>Account ${esc(number)}</span>`; r.hidden = false; }
+    ['bBank','bRout','bAcc','bName'].forEach(id => { if ($(id)) $(id).value = ''; });
+    drawBankList(); toast('Bank details saved');
+  }, 4000);
+}
+function bankDelete(id){
+  state.banks = state.banks.filter(b => b.id !== id); persist();
+  log('Deleted saved bank details'); drawBankList(); toast('Deleted');
+}
+
+
+/* ----- Delete customer: pick from dropdown, confirm, delete ----- */
+function sheetDelete(){
+  if (!state.customers.length) {
+    openSheet('Delete customer', `<p class="hint">No customers yet. There is nobody to delete.</p><button class="btn quiet" data-act="closeSheet">Cancel</button>`);
+    return;
+  }
+  openSheet('Delete customer', `
+    <p class="hint" style="margin-bottom:14px">Choose a customer. You will be asked to confirm before anything is deleted.</p>
+    <div class="field"><label for="dCust">Customer</label><select id="dCust" class="input">${customerOptions()}</select><div class="err" id="dCustErr"></div></div>
+    <div id="dConfirm" hidden>
+      <div class="review" id="dConfirmText"></div>
+      <button class="btn primary" data-act="doDelete" style="background:#c0392b">Yes, delete this customer</button>
+      <button class="btn quiet" data-act="closeSheet">Cancel</button>
+    </div>
+    <button class="btn primary" id="dAsk" data-act="askDelete">Delete</button>
+    <button class="btn quiet" data-act="closeSheet">Cancel</button>`);
+}
+function askDelete(){
+  const c = byId($('dCust').value);
+  if (!c) return setErr('dCust', 'Select a customer.');
+  $('dConfirmText').innerHTML = `Delete <b>${esc(custName(c))}</b> (Customer ID ${esc(c.cid)})?<br><span style="color:var(--mist)">This permanently removes the customer, their accounts and their history. This cannot be undone.</span>`;
+  $('dConfirm').hidden = false;
+  $('dAsk').hidden = true;
+}
+function doDelete(){
+  const c = byId($('dCust').value);
+  if (!c) return;
+  const name = custName(c), cid = c.cid;
+  state.customers = state.customers.filter(x => x.id !== c.id);
+  if (cloudCache) {
+    cloudCache.customers = state.customers;
+    if (cloudCache.cids) delete cloudCache.cids[cid];
+  }
+  persist();
+  log(`Deleted customer ${name} (Customer ID ${cid})`);
+  closeSheet(); render();
+  toast('Customer deleted');
+}
+
+/* ----- Settings: change login details ----- */
+function sheetSettings(){
+  openSheet('Settings', `
+    <p class="hint" style="margin-bottom:14px">Signed in as <b style="color:var(--ivory)">${esc(state.user)}</b>. Changes apply the next time you sign in.</p>
+    <div class="field"><label for="sCur">Current passcode</label><input id="sCur" class="input" type="password" autocomplete="current-password"><div class="err" id="sCurErr"></div></div>
+    <div class="field"><label for="sUser">Username</label><input id="sUser" class="input" value="${esc(state.user)}" autocomplete="off" autocapitalize="none" spellcheck="false"><div class="err" id="sUserErr"></div></div>
+    <div class="field"><label for="sNew">New passcode</label><input id="sNew" class="input" type="password" autocomplete="new-password"><div class="hint">At least 8 characters. Leave blank to keep the current passcode.</div><div class="err" id="sNewErr"></div></div>
+    <div class="field"><label for="sConf">Confirm new passcode</label><input id="sConf" class="input" type="password" autocomplete="new-password"><div class="err" id="sConfErr"></div></div>
+    <button class="btn primary" data-act="doSettings">Save login details</button>
+    <button class="btn quiet" data-act="closeSheet">Cancel</button>`);
+}
+async function doSettings(){
+  clearErrs($('sheetBody'));
+  const cur = $('sCur').value, user = $('sUser').value.trim(), np = $('sNew').value, cf = $('sConf').value;
+  if (!(await checkLogin(state.user, cur))) return setErr('sCur', 'That passcode is incorrect.');
+  if (!/^[A-Za-z0-9._-]{3,32}$/.test(user)) return setErr('sUser', 'Use 3 to 32 letters, numbers, dots, dashes or underscores.');
+  if (np && np.length < 8) return setErr('sNew', 'Use at least 8 characters.');
+  if (np && np !== cf) return setErr('sConf', 'The passcodes do not match.');
+  if (user === state.user && !np) return setErr('sUser', 'Change the username or enter a new passcode.');
+  const hash = await hashPw(np || cur);
+  try { localStorage.setItem(CRED_KEY, JSON.stringify({ user: user.toLowerCase(), hash })); }
+  catch (e) { return toast('Could not save. Browser storage is unavailable.', true); }
+  state.user = user.toLowerCase();
+  log('Updated admin login details');
+  closeSheet(); render(); toast('Login details saved');
+}
+
+/* ============ Event delegation ============ */
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const a = el.dataset.act, id = el.dataset.id, mode = el.dataset.mode;
+  ({
+    logout, refresh: refreshNow, closeSheet,
+    create: sheetCreate, credit: () => sheetTx('credit'), debit: () => sheetTx('debit'),
+    restrict: () => sheetRestrict(), queue: sheetQueue,
+    customer: () => sheetCustomer(id),
+    doCreate, doTx: () => doTx(mode), doRestrict, doUnfreeze,
+    approve: () => resolveTransfer(id, true), decline: () => resolveTransfer(id, false),
+    copyDetails: () => copyDetails(id), restrictFor: () => sheetRestrict(id),
+    banks: sheetBanks, bankGenerate, bankDelete: () => bankDelete(id),
+    delete: sheetDelete, askDelete, doDelete, saveTxDates: () => saveTxDates(id),
+    editCustomer: () => sheetEditCustomer(id), saveEditCustomer: () => saveEditCustomer(id),
+    authentication: sheetAuth, authCustomer: () => sheetAuthCustomer(id), authToggle: () => authToggle(id),
+    thirdparty: sheetTP, tpCustomer: () => sheetTPCustomer(id), tpBack: sheetTP,
+    tpAdd: () => tpAdd(id), tpRemove: () => tpRemove(id, el.dataset.email),
+    settings: sheetSettings, doSettings,
+  }[a] || (() => {}))();
+});
+</script>
+
+<script>
+/* PWA installation support. Native install prompts are controlled by the browser. */
+(() => {
+  const overlay = document.getElementById('installOverlay');
+  const installButton = document.getElementById('installNow');
+  const laterButton = document.getElementById('installLater');
+  const help = document.getElementById('installHelp');
+  let deferredPrompt = null;
+  const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const close = () => overlay.classList.remove('show');
+  if (!isStandalone && !sessionStorage.getItem('installPromptDismissed')) {
+    window.addEventListener('load', () => setTimeout(() => { if (!isStandalone()) overlay.classList.add('show'); }, 900));
+  }
+  window.addEventListener('beforeinstallprompt', event => {
+    event.preventDefault(); deferredPrompt = event;
+    installButton.textContent = 'Install App';
+    help.textContent = 'Your browser supports direct installation.';
+  });
+  window.addEventListener('appinstalled', () => { deferredPrompt = null; close(); });
+  installButton.addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      close();
+    } else if (isIOS) {
+      help.textContent = 'On iPhone or iPad: tap the Share button in Safari, choose “Add to Home Screen”, then tap Add.';
+      installButton.textContent = 'Got it';
+      installButton.onclick = close;
+    } else {
+      help.textContent = 'If the install dialog does not appear, open your browser menu (⋮) and choose “Install app” or “Add to Home screen”.';
+      installButton.textContent = 'Got it';
+      installButton.onclick = close;
+    }
+  });
+  laterButton.addEventListener('click', () => { sessionStorage.setItem('installPromptDismissed','1'); close(); });
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(err => console.warn('Service worker registration failed', err)));
+  }
+})();
+</script>
+
+</body>
+</html>
